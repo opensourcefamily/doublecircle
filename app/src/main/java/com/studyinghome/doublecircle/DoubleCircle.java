@@ -56,6 +56,11 @@ public class DoubleCircle extends View {
     private int x, y;
     private FirstContentListener firstContentListener;
     private SecondContentListener secondContentListener;
+    /**
+     * 半径
+     */
+    private int radius;
+    private float angle;
 
     public DoubleCircle(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -74,12 +79,13 @@ public class DoubleCircle extends View {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-//        touchToRotate(event);
+        touchToRotate(event);
         return super.dispatchTouchEvent(event);
     }
 
     /**
      * 当View要为所有子对象分配大小和位置时，调用此方法
+     *
      * @param changed
      * @param left
      * @param top
@@ -94,6 +100,7 @@ public class DoubleCircle extends View {
 
     /**
      * View会调用此方法，来确认自己及所有子对象的大小
+     *
      * @param widthMeasureSpec
      * @param heightMeasureSpec
      */
@@ -103,6 +110,8 @@ public class DoubleCircle extends View {
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        // 获得半径
+        radius = Math.max(getMeasuredWidth(), getMeasuredHeight());
         setMeasuredDimension(measureView(widthMode, widthSize), measureView(heightMode, heightSize));
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
@@ -119,7 +128,6 @@ public class DoubleCircle extends View {
         paint.setDither(true);
         doDraw(canvas);
     }
-
 
 
     /**
@@ -209,9 +217,9 @@ public class DoubleCircle extends View {
      * 绘制当前内容
      */
     private void doDraw(Canvas canvas) {
-        //绘制第一个圆
-        drawSecondContent(canvas);
         //绘制第二个圆
+        drawSecondContent(canvas);
+        //绘制第一个圆
         drawFirstContent(canvas);
         //绘制中心logo
         canvas.drawBitmap(bitmap, null, bitRec, paint);
@@ -269,37 +277,37 @@ public class DoubleCircle extends View {
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
-                if (mode == TouchMode.MODE_FIRST) {
-                    int rotatedRadius = rotateTimeFirst * 8;
-                    int rotated = rotatedRadius / 60;
-                    int leftRadius = rotatedRadius % 60;
-                    if (leftRadius > 30) {
-                        rotated += 1;
-                    }
-                    firstChoose -= (rotated - lastFirstRotated);
-                    lastFirstRotated = rotated;
-                    if (firstChoose < 0) {
-                        firstChoose = 5;
-                    } else if (firstChoose > 5) {
-                        firstChoose = 0;
-                    }
-                    firstContentListener.rotate(getChoosedFirstContent());
-                } else if (mode == TouchMode.MODE_SECOND) {
-                    int rotateRadius = rotateTime * 4;
-                    int rotated = rotateRadius / 30;
-                    int leftRadius = rotateRadius % 30;
-                    if (leftRadius > 15) {
-                        rotated += 1;
-                    }
-                    secondChoosePosition -= (rotated - lastSecondRotated);
-                    lastSecondRotated = rotated;
-                    if (secondChoosePosition < 0) {
-                        secondChoosePosition = 11;
-                    } else if (firstChoose > 11) {
-                        secondChoosePosition = 0;
-                    }
-                    secondContentListener.rotate(getChoosedSecondContent());
-                }
+//                if (mode == TouchMode.MODE_FIRST) {
+//                    int rotatedRadius = rotateTimeFirst * 8;
+//                    int rotated = rotatedRadius / 60;
+//                    int leftRadius = rotatedRadius % 60;
+//                    if (leftRadius > 30) {
+//                        rotated += 1;
+//                    }
+//                    firstChoose -= (rotated - lastFirstRotated);
+//                    lastFirstRotated = rotated;
+//                    if (firstChoose < 0) {
+//                        firstChoose = 5;
+//                    } else if (firstChoose > 5) {
+//                        firstChoose = 0;
+//                    }
+//                    firstContentListener.rotate(getChoosedFirstContent());
+//                } else if (mode == TouchMode.MODE_SECOND) {
+//                    int rotateRadius = rotateTime * 4;
+//                    int rotated = rotateRadius / 30;
+//                    int leftRadius = rotateRadius % 30;
+//                    if (leftRadius > 15) {
+//                        rotated += 1;
+//                    }
+//                    secondChoosePosition -= (rotated - lastSecondRotated);
+//                    lastSecondRotated = rotated;
+//                    if (secondChoosePosition < 0) {
+//                        secondChoosePosition = 11;
+//                    } else if (firstChoose > 11) {
+//                        secondChoosePosition = 0;
+//                    }
+//                    secondContentListener.rotate(getChoosedSecondContent());
+//                }
                 break;
             default:
                 break;
@@ -347,13 +355,15 @@ public class DoubleCircle extends View {
      * @param degree 已经转动的角度
      */
     private void drawFirstContentText(Canvas canvas, float degree) {
+//        System.out.println("degree======" + degree);
+
         canvas.rotate(degree, width / 2, height / 2);
         for (int i = 0; i < FIRST_CONTENT_NUM; i++) {
             paint.setColor(Color.WHITE);
             paint.setTextSize(width / 18);
             paint.setFakeBoldText(true);
             Path path = new Path();
-            path.addArc(firstRec, 6, 60);
+            path.addArc(firstRec, 0, 60);
             String text = firstContent[i];
             canvas.drawTextOnPath(text, path, width / 12, height / 12, paint);
             canvas.rotate(60, width / 2, height / 2);
@@ -392,21 +402,43 @@ public class DoubleCircle extends View {
     }
 
     /**
+     * 根据触摸的位置，计算角度
+     *
+     * @param xTouch
+     * @param yTouch
+     * @return
+     */
+    private float getAngle(float xTouch, float yTouch) {
+        double x = xTouch - (radius / 2d);
+        double y = yTouch - (radius / 2d);
+        return (float) (Math.asin(y / Math.hypot(x, y)) * 180 / Math.PI);
+    }
+
+    /**
      * 判断当前的触摸点所在的区域
      *
      * @param x x
      * @param y y
      */
-    private void positionPart(float x, float y) {
-        if (x < width / 2 && y < height / 2) {
-            position = 1;
-        } else if (x > width / 2 && y < height / 2) {
-            position = 2;
-        } else if (x > width / 2 && height > height / 2) {
-            position = 3;
-        } else if (x < width / 2 && height > height / 2) {
-            position = 4;
+    private int positionPart(float x, float y) {
+//        if (x < width / 2 && y < height / 2) {
+//            position = 1;
+//        } else if (x > width / 2 && y < height / 2) {
+//            position = 2;
+//        } else if (x > width / 2 && height > height / 2) {
+//            position = 3;
+//        } else if (x < width / 2 && height > height / 2) {
+//            position = 4;
+//        }
+
+        int tmpX = (int) (x - radius / 2);
+        int tmpY = (int) (y - radius / 2);
+        if (tmpX >= 0) {
+            return position = tmpY >= 0 ? 4 : 1;
+        } else {
+            return position = tmpY >= 0 ? 3 : 2;
         }
+
     }
 
     /**
@@ -416,23 +448,73 @@ public class DoubleCircle extends View {
      * @param moveY y
      */
     private void touchHandle(int moveX, int moveY) {
-        if (moveX - x < 0 && moveY - y > 1) {
-            if (mode == TouchMode.MODE_FIRST) {
-                rotateTimeFirst += 1;
-                rotatedFirst += 1;
-            } else if (mode == TouchMode.MODE_SECOND) {
-                rotateTime += 1;
-            }
-        } else if (moveX - x > 0 && moveY - y < -1) {
-            if (mode == TouchMode.MODE_FIRST) {
-                rotateTimeFirst -= 1;
-                if (rotatedFirst > 1) {
-                    rotatedFirst -= 1;
+        /**
+         * 获得开始的角度
+         */
+        float start = getAngle(x, y);
+        /**
+         * 获得当前的角度
+         */
+        float end = getAngle(moveX, moveY);
+        if (end - start == 0) {
+
+        } else if (positionPart(moveX, moveY) == 1 || positionPart(moveX, moveY) == 4) {
+            if (end - start > 0) {
+                if (mode == TouchMode.MODE_FIRST) {
+                    rotateTimeFirst += 1;
+                    rotatedFirst += 1;
+                } else if (mode == TouchMode.MODE_SECOND) {
+                    rotateTime += 1;
                 }
-            } else if (mode == TouchMode.MODE_SECOND) {
-                rotateTime -= 1;
+            } else {
+                if (mode == TouchMode.MODE_FIRST) {
+                    rotateTimeFirst -= 1;
+                    rotatedFirst -= 1;
+                } else if (mode == TouchMode.MODE_SECOND) {
+                    rotateTime -= 1;
+                }
             }
+            angle = (int) (end - start);
+        } else {
+            if (end - start < 0) {
+                if (mode == TouchMode.MODE_FIRST) {
+                    rotateTimeFirst += 1;
+                    rotatedFirst += 1;
+                } else if (mode == TouchMode.MODE_SECOND) {
+                    rotateTime += 1;
+                }
+            } else {
+                if (mode == TouchMode.MODE_FIRST) {
+                    rotateTimeFirst -= 1;
+                    rotatedFirst -= 1;
+                } else if (mode == TouchMode.MODE_SECOND) {
+                    rotateTime -= 1;
+                }
+            }
+            angle = (int) (end - start);
         }
+//        System.out.println("rotateTimeFirst========" + rotateTimeFirst);
+//        System.out.println("rotatedFirst========" + rotatedFirst);
+//        System.out.println("rotateTime========" + rotateTime);
+//        System.out.println("angle========" + angle);
+
+//        if (moveX - x < 0 && moveY - y > 1) {
+//            if (mode == TouchMode.MODE_FIRST) {
+//                rotateTimeFirst += 1;
+//                rotatedFirst += 1;
+//            } else if (mode == TouchMode.MODE_SECOND) {
+//                rotateTime += 1;
+//            }
+//        } else if (moveX - x > 0 && moveY - y < -1) {
+//            if (mode == TouchMode.MODE_FIRST) {
+//                rotateTimeFirst -= 1;
+//                if (rotatedFirst > 1) {
+//                    rotatedFirst -= 1;
+//                }
+//            } else if (mode == TouchMode.MODE_SECOND) {
+//                rotateTime -= 1;
+//            }
+//        }
     }
 
     public interface FirstContentListener {
