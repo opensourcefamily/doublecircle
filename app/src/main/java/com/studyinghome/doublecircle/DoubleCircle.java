@@ -9,9 +9,11 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 /**
  * @author Michell chen 2017-2-22
@@ -31,7 +33,7 @@ public class DoubleCircle extends View {
     private static final int FIRST_CONTENT_COLOR_BASE = Color.parseColor("#FFC600");
     private static final int SECOND_CONTENT_COLOR_BASE = Color.parseColor("#36B0B1");
     private static final String[] FIRST_CONTENT = {"菜 系1", "菜 系2", "菜 系3", "菜 系4", "菜 系5", "菜 系6"};
-    private static final String[] SECOND_CONTENT = {"菜 品", "菜 品", "菜 品", "菜 品", "菜 品", "菜 品", "菜 品", "菜 品", "菜 品", "菜 品", "菜 品", "菜 品"};
+    private static final String[] SECOND_CONTENT = {"菜 品1", "菜 品2", "菜 品3", "菜 品4", "菜 品5", "菜 品6", "菜 品7", "菜 品8", "菜 品9", "菜 品A", "菜 品B", "菜 品C"};
     private int firstChoose = 1;
     private int secondChoose = 1;
     private int secondChoosePosition = 1;
@@ -277,37 +279,37 @@ public class DoubleCircle extends View {
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
-//                if (mode == TouchMode.MODE_FIRST) {
-//                    int rotatedRadius = rotateTimeFirst * 8;
-//                    int rotated = rotatedRadius / 60;
-//                    int leftRadius = rotatedRadius % 60;
-//                    if (leftRadius > 30) {
-//                        rotated += 1;
-//                    }
-//                    firstChoose -= (rotated - lastFirstRotated);
-//                    lastFirstRotated = rotated;
-//                    if (firstChoose < 0) {
-//                        firstChoose = 5;
-//                    } else if (firstChoose > 5) {
-//                        firstChoose = 0;
-//                    }
-//                    firstContentListener.rotate(getChoosedFirstContent());
-//                } else if (mode == TouchMode.MODE_SECOND) {
-//                    int rotateRadius = rotateTime * 4;
-//                    int rotated = rotateRadius / 30;
-//                    int leftRadius = rotateRadius % 30;
-//                    if (leftRadius > 15) {
-//                        rotated += 1;
-//                    }
-//                    secondChoosePosition -= (rotated - lastSecondRotated);
-//                    lastSecondRotated = rotated;
-//                    if (secondChoosePosition < 0) {
-//                        secondChoosePosition = 11;
-//                    } else if (firstChoose > 11) {
-//                        secondChoosePosition = 0;
-//                    }
-//                    secondContentListener.rotate(getChoosedSecondContent());
-//                }
+                if (mode == TouchMode.MODE_FIRST) {
+                    int rotatedRadius = rotateTimeFirst * 8;
+                    int rotated = rotatedRadius / 60;
+                    int leftRadius = rotatedRadius % 60;
+                    if (leftRadius > 30) {
+                        rotated += 1;
+                    }
+                    firstChoose -= (rotated - lastFirstRotated);
+                    lastFirstRotated = rotated;
+                    if (firstChoose < 0) {
+                        firstChoose = 5;
+                    } else if (firstChoose > 5) {
+                        firstChoose = 0;
+                    }
+                    firstContentListener.rotate(getChoosedFirstContent());
+                } else if (mode == TouchMode.MODE_SECOND) {
+                    int rotateRadius = rotateTime * 4;
+                    int rotated = rotateRadius / 30;
+                    int leftRadius = rotateRadius % 30;
+                    if (leftRadius > 15) {
+                        rotated += 1;
+                    }
+                    secondChoosePosition -= (rotated - lastSecondRotated);
+                    lastSecondRotated = rotated;
+                    if (secondChoosePosition < 0) {
+                        secondChoosePosition = 11;
+                    } else if (firstChoose > 11) {
+                        secondChoosePosition = 0;
+                    }
+                    secondContentListener.rotate(getChoosedSecondContent());
+                }
                 break;
             default:
                 break;
@@ -474,7 +476,6 @@ public class DoubleCircle extends View {
                     rotateTime -= 1;
                 }
             }
-            angle = (int) (end - start);
         } else {
             if (end - start < 0) {
                 if (mode == TouchMode.MODE_FIRST) {
@@ -491,7 +492,6 @@ public class DoubleCircle extends View {
                     rotateTime -= 1;
                 }
             }
-            angle = (int) (end - start);
         }
 //        System.out.println("rotateTimeFirst========" + rotateTimeFirst);
 //        System.out.println("rotatedFirst========" + rotatedFirst);
